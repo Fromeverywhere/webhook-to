@@ -2,7 +2,7 @@
 
 [![release](https://img.shields.io/github/v/release/Fromeverywhere/webhook-to?color=2f81f7)](https://github.com/Fromeverywhere/webhook-to/releases)
 [![ci](https://github.com/Fromeverywhere/webhook-to/actions/workflows/release.yml/badge.svg)](https://github.com/Fromeverywhere/webhook-to/actions/workflows/release.yml)
-[![ghcr](https://img.shields.io/badge/ghcr.io-webhook--to--src%3A1.2.0-2496ed?logo=docker&logoColor=white)](https://github.com/Fromeverywhere/webhook-to-src/pkgs/container/webhook-to-src)
+[![ghcr](https://img.shields.io/badge/ghcr.io-webhook--to--src%3A1.3.0-2496ed?logo=docker&logoColor=white)](https://github.com/Fromeverywhere/webhook-to-src/pkgs/container/webhook-to-src)
 [![dockerhub](https://img.shields.io/docker/pulls/fromeverywhere/webhook-to?logo=docker&logoColor=white)](https://hub.docker.com/r/fromeverywhere/webhook-to)
 [![license](https://img.shields.io/github/license/Fromeverywhere/webhook-to)](LICENSE)
 
@@ -15,9 +15,9 @@
 - **规则路由架构**：统计面板里用连线画出入站 → 出站的真实投递路径，多条入站指向同一出站会分别连到同一个出站名称
 - **定时通知**：独立页面管理，不依赖上游，按间隔或每天固定时间主动推送
 - **反向回调**：在企业微信应用里点菜单 / 发一句话 → Webhook-To 调上游 API（MoviePilot 等）→ 把结果作为消息回给用户
-- **管理**：内置 WebUI，九个页面全流程可视化操作，无需手写 YAML
+- **管理**：内置 WebUI（v1.3.0 面板式改版：左侧导航 + 顶栏布局，宝塔 / 1Panel 风格），九个页面全流程可视化操作，无需手写 YAML
 
-镜像标签 `1.2.0` / `1.2` / `latest`，`linux/amd64` + `linux/arm64` 同一份索引，GHCR 与 Docker Hub 内容一致。
+镜像标签 `1.3.0` / `1.3` / `latest`，`linux/amd64` + `linux/arm64` 同一份索引，GHCR 与 Docker Hub 内容一致。
 
 **目录**：[安装](#安装) · [快速上手](#快速上手) · [核心概念](#核心概念) · [调用入口](#调用入口) · [预设库](#预设库) · [规则路由架构](#规则路由架构) · [定时通知](#定时通知) · [回调验证](#回调验证企业微信-url-校验) · [回调规则](#回调规则反向控制) · [企微应用菜单](#企微应用自定义菜单) · [回调直通](#回调直通把企微回调原样转给上游) · [通知监听](#通知监听) · [回调监听](#回调监听) · [内置文档与新手指引](#内置文档与新手指引) · [安全](#安全) · [环境变量](#环境变量) · [数据目录](#数据目录) · [自己构建与发布](#自己构建与发布) · [常见问题](#常见问题)
 
@@ -30,7 +30,7 @@
 ```yaml
 services:
   webhook-to:
-    image: fromeverywhere/webhook-to:1.2.0
+    image: fromeverywhere/webhook-to:1.3.0
     container_name: webhook-to
     restart: unless-stopped
     ports:
@@ -57,7 +57,7 @@ docker compose up -d
 打开 `http://<host>:20010/` 即可。
 
 - `./data:/app/data`：**一个目录装下全部状态**（入站规则在 `data/rules/`，其余是设置、凭据、出站规则、回调、监听、日志），备份 / 迁移只拷这一个文件夹。
-- **离线导入**：`docker load < webhook-to-1.2.0.tar` 后把 `image:` 改成加载出来的镜像名即可。
+- **离线导入**：`docker load < webhook-to-1.3.0.tar` 后把 `image:` 改成加载出来的镜像名即可。
 
 ### docker run
 
@@ -68,16 +68,16 @@ docker run -d --name webhook-to --restart unless-stopped \
   -v "$PWD/data:/app/data" \
   -e TZ=Asia/Shanghai \
   -e RULES_DIR=data/rules/ \
-  fromeverywhere/webhook-to:1.2.0
+  fromeverywhere/webhook-to:1.3.0
 ```
 
 ### 镜像与标签
 
 | 标签 | 说明 |
 | --- | --- |
-| `fromeverywhere/webhook-to:1.2.0` | 精确版本（推荐固定用这个） |
-| `fromeverywhere/webhook-to:1.2` / `latest` | 同一份镜像的移动别名 |
-| `ghcr.io/fromeverywhere/webhook-to-src:1.2.0` | 同内容镜像；**私有包**，拉取前需 `docker login ghcr.io` |
+| `fromeverywhere/webhook-to:1.3.0` | 精确版本（推荐固定用这个） |
+| `fromeverywhere/webhook-to:1.3` / `latest` | 同一份镜像的移动别名 |
+| `ghcr.io/fromeverywhere/webhook-to-src:1.3.0` | 同内容镜像；**私有包**，拉取前需 `docker login ghcr.io` |
 
 双架构（amd64 / arm64）由 CI 构建；Docker Hub 上的镜像由工作流从 GHCR 原样复制，两处 digest 一致。
 
@@ -293,7 +293,7 @@ docker run -d --name webhook-to --restart unless-stopped \
 
 ## 内置文档与新手指引
 
-- **文档中心** `http://<host>:20010/docs/index.html`：入站预设设置文档（含「哪些上游没有 Webhook 出口」总览）、出站预设设置文档、回调预设设置文档、《通知规则高级配置指南》（Extract 路径、模板函数、条件过滤、条件路由、签名校验、定时变量、监听、内部通知与失败补偿）
+- **文档中心** `http://<host>:20010/docs/index.html`（v1.3.0 重构：左侧全局目录导航 + 页内目录，分栏分节）：入站预设设置文档（含「哪些上游没有 Webhook 出口」总览）、出站预设设置文档、回调预设设置文档、《通知规则高级配置指南》（Extract 路径、模板函数、条件过滤、条件路由、签名校验、定时变量、监听、内部通知与失败补偿）
 - **新手上手清单**：首页顶部五步清单（出站 → 测试 → 入站 → 交地址 → 改密码），完成自动打勾，每步带直达按钮，可随时「不再显示」
 - **操作指引**：右上角 ❓ 或「设置 → 重看操作指引」，7 步聚光灯向导
 - **错误白话化**：连接失败、鉴权失败、模板语法错误等直接说人话并给出下一步建议
@@ -366,7 +366,7 @@ bash test.sh
 python tools/build_image.py
 ```
 
-发布链路（CI 已配置）：打 `v*` tag → GitHub Release 附 `webhook-to-linux-amd64` 二进制 → 构建多架构镜像推 GHCR（`1.2.0` / `1.2` / `latest`，包名 `webhook-to-src`）→ 手动触发 `dockerhub-sync` 工作流把 GHCR 镜像原样复制到 Docker Hub（digest 一致）。
+发布链路（CI 已配置）：打 `v*` tag → GitHub Release 附 `webhook-to-linux-amd64` 二进制 → 构建多架构镜像推 GHCR（`1.3.0` / `1.3` / `latest`，包名 `webhook-to-src`）→ 手动触发 `dockerhub-sync` 工作流把 GHCR 镜像原样复制到 Docker Hub（digest 一致）。
 
 ---
 
